@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Treadmill Workout Display</title>
+    <style>
+        /* General styling for the body */
+        body {
+            font-family: Arial, sans-serif; /* Sets the font style for the page */
+            text-align: center; /* Centers text on the page */
+            margin: 0; /* Removes default margins */
+            padding: 0; /* Removes default padding */
+            background: url('woman-running.png') no-repeat center center fixed; /* Sets the background image */
+            background-size: cover; /* Ensures the background image covers the entire page */
+            color: white; /* Sets the default text color to white */
+        }
+        /* Styling for the main heading */
+        .heading {
+            font-size: 72px; /* Sets the font size for the heading */
+            margin-bottom: 20px; /* Adds space below the heading */
+            color: darkgreen; /* Sets the color of the heading */
+        }
+        /* Styling for the subheading */
+        .subheading {
+            font-size: 48px; /* Sets the font size for the subheading */
+            margin-bottom: 20px; /* Adds space below the subheading */
+            color: black; /* Sets the color of the subheading */
+        }
+        /* Styling for the workout container */
+        .workout-container {
+            background-color: rgba(0, 0, 0, 0.7); /* Sets a semi-transparent background color */
+            padding: 20px; /* Adds padding inside the container */
+            border-radius: 20px; /* Rounds the corners of the container */
+            display: inline-block; /* Makes the container inline-block */
+            max-width: 90%; /* Ensures the container does not exceed 90% of the screen width */
+        }
+        /* Styling for the workout display text */
+        .workout-display {
+            font-size: 72px; /* Sets the font size for the workout display */
+            margin-bottom: 40px; /* Adds space below the workout display */
+        }
+        /* Styling for the incline and time display text */
+        .incline-display, .time-display {
+            font-size: 48px; /* Sets the font size for the incline and time displays */
+            color: white; /* Sets the color of the text */
+            margin-bottom: 20px; /* Adds space below the displays */
+        }
+        /* Styling for the green number text */
+        .green-number {
+            color: lightgreen; /* Sets the color of the green numbers */
+        }
+        /* Styling for the red number text */
+        .red-number {
+            color: red; /* Sets the color of the red numbers */
+        }
+        /* Styling for the pause button */
+        .pause-button {
+            font-size: 24px; /* Sets the font size for the button */
+            padding: 10px 20px; /* Adds padding inside the button */
+            background-color: #5293E8; /* Sets the background color of the button */
+            color: white; /* Sets the text color of the button */
+            border: none; /* Removes the border of the button */
+            border-radius: 10px; /* Rounds the corners of the button */
+            cursor: pointer; /* Changes the cursor to a pointer when hovering over the button */
+        }
+        /* Styling for the pause button on hover */
+        .pause-button:hover {
+            background-color: #3a72c6; /* Changes the background color of the button when hovered */
+        }
+        /* Media query for smaller screens */
+        @media (max-width: 600px) {
+            .heading {
+                font-size: 48px; /* Reduce font size for the heading on smaller screens */
+            }
+            .subheading {
+                font-size: 36px; /* Reduce font size for the subheading on smaller screens */
+            }
+            .workout-display, .incline-display, .time-display {
+                font-size: 36px; /* Reduce font size for workout display on smaller screens */
+            }
+            .pause-button {
+                font-size: 20px; /* Reduce font size for the button on smaller screens */
+                padding: 8px 16px; /* Adjust padding for the button on smaller screens */
+            }
+            .workout-container {
+                padding: 10px; /* Adjust padding inside the container on smaller screens */
+                border-radius: 10px; /* Adjust border radius on smaller screens */
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Main heading of the page -->
+    <div class="heading">DAILY WALKING WORKOUT</div>
+    <!-- Subheading of the page -->
+    <div class="subheading" id="subheading">Warm-Up</div>
+    <!-- Container for the workout display elements -->
+    <div class="workout-container">
+        <div class="workout-display" id="workoutDisplay">Starting Workout...</div>
+        <div class="incline-display" id="inclineDisplay"></div>
+        <div class="time-display" id="timeDisplay"></div>
+        <button class="pause-button" id="pauseButton" onclick="togglePause()">Pause</button>
+    </div>
+
+    <script>
+        console.log("JavaScript is running");
+
+        // Array of workout steps with duration, speed, and incline
+        const workoutSteps = [
+            { duration: 5 * 60, speed: '3.0 mph', incline: '0%' },
+            { duration: 5 * 60, speed: '3.5 mph', incline: '1%' },
+            { duration: 5 * 60, speed: '4.0 mph', incline: '1%' },
+            { duration: 5 * 60, speed: '3.5 mph', incline: '2%' },
+            { duration: 5 * 60, speed: '4.0 mph', incline: '2%' },
+            { duration: 5 * 60, speed: '3.0 mph', incline: '0%' }
+        ];
+
+        let currentStep = 0; // Index of the current workout step
+        let timeLeft = workoutSteps[currentStep].duration; // Time left in the current step
+        let timer; // Variable to hold the interval timer
+        let isPaused = false; // Boolean to check if the workout is paused
+
+        // Function to update the display
+        function updateDisplay() {
+            if (currentStep < workoutSteps.length) {
+                const step = workoutSteps[currentStep];
+                document.getElementById('workoutDisplay').innerHTML = `Speed: <span class="green-number">${step.speed}</span>`;
+                document.getElementById('inclineDisplay').innerHTML = `Incline: <span class="green-number">${step.incline}</span>`;
+                document.getElementById('timeDisplay').innerHTML = `Time Left: <span class="red-number">${formatTime(timeLeft)}</span>`;
+
+                // Show or hide the subheading based on incline
+                if (step.incline === '0%') {
+                    document.getElementById('subheading').style.display = 'block';
+                } else {
+                    document.getElementById('subheading').style.display = 'none';
+                }
+
+                // Update the time left or move to the next step
+                if (timeLeft > 0) {
+                    timeLeft--;
+                } else {
+                    currentStep++;
+                    if (currentStep < workoutSteps.length) {
+                        timeLeft = workoutSteps[currentStep].duration;
+                    }
+                }
+            } else {
+                // Workout complete
+                document.getElementById('workoutDisplay').innerHTML = 'Workout Complete!';
+                document.getElementById('inclineDisplay').innerHTML = '';
+                document.getElementById('timeDisplay').innerHTML = '';
+                clearInterval(timer); // Stop the timer
+            }
+        }
+
+        // Function to format time from seconds to MM:SS
+        function formatTime(seconds) {
+            const minutes = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${minutes}:${secs < 10 ? '0' : ''}${secs}`;
+        }
+
+        // Function to start the timer
+        function startTimer() {
+            timer = setInterval(updateDisplay, 1000); // Update display every second
+        }
+
+        // Function to stop the timer
+        function stopTimer() {
+            clearInterval(timer); // Clear the interval timer
+        }
+
+        // Function to toggle between pause and resume
+        function togglePause() {
+            if (isPaused) {
+                startTimer();
+                document.getElementById('pauseButton').textContent = 'Pause';
+            } else {
+                stopTimer();
+                document.getElementById('pauseButton').textContent = 'Resume';
+            }
+            isPaused = !isPaused; // Toggle the pause state
+        }
+
+        startTimer(); // Start the workout timer when the page loads
+    </script>
+</body>
+</html>
